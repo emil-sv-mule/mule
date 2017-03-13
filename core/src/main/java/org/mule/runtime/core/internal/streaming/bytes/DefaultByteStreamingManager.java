@@ -12,19 +12,16 @@ import static org.mule.runtime.core.internal.streaming.bytes.DefaultByteStreamin
 import static org.mule.runtime.core.internal.streaming.bytes.DefaultByteStreamingManager.Status.SURVIVOR;
 import static org.slf4j.LoggerFactory.getLogger;
 import static reactor.core.publisher.Mono.from;
-
 import org.mule.runtime.api.lifecycle.Disposable;
 import org.mule.runtime.api.scheduler.Scheduler;
 import org.mule.runtime.api.streaming.CursorStream;
 import org.mule.runtime.core.api.EventContext;
 import org.mule.runtime.core.api.MuleContext;
-import org.mule.runtime.core.streaming.bytes.ByteStreamingStatistics;
-import org.mule.runtime.core.streaming.bytes.CursorStreamProviderFactory;
-import org.mule.runtime.core.streaming.bytes.FileStoreCursorStreamConfig;
-import org.mule.runtime.core.streaming.bytes.InMemoryCursorStreamConfig;
-import org.mule.runtime.core.internal.streaming.bytes.factory.FileStoreCursorStreamProviderFactory;
 import org.mule.runtime.core.internal.streaming.bytes.factory.InMemoryCursorStreamProviderFactory;
 import org.mule.runtime.core.internal.streaming.bytes.factory.NullCursorStreamProviderFactory;
+import org.mule.runtime.core.streaming.bytes.ByteStreamingStatistics;
+import org.mule.runtime.core.streaming.bytes.CursorStreamProviderFactory;
+import org.mule.runtime.core.streaming.bytes.InMemoryCursorStreamConfig;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -82,14 +79,6 @@ public class DefaultByteStreamingManager implements ByteStreamingManagerAdapter,
   @Override
   public CursorStreamProviderFactory getInMemoryCursorStreamProviderFactory(InMemoryCursorStreamConfig config) {
     return new InMemoryCursorStreamProviderFactory(this, config, bufferFactory);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public CursorStreamProviderFactory getFileStoreCursorStreamProviderFactory(FileStoreCursorStreamConfig config) {
-    return new FileStoreCursorStreamProviderFactory(this, config, bufferFactory, executorService);
   }
 
   /**
@@ -188,6 +177,14 @@ public class DefaultByteStreamingManager implements ByteStreamingManagerAdapter,
 
   enum Status {
     NORMAL, SURVIVOR, DISPOSABLE
+  }
+
+  protected ByteBufferManager getBufferFactory() {
+    return bufferFactory;
+  }
+
+  protected Scheduler getExecutorService() {
+    return executorService;
   }
 
   private class EventStreamingState {
