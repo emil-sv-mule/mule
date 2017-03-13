@@ -111,8 +111,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -125,13 +125,12 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * {@code MuleContext#getCustomizationService}.
  * <p>
  * This class takes cares of registering bean definitions for each of the provided services so dependency injection can be
- * properly done through the use of {@link javax.inject.Inject}.
+ * properly done through the use of {@link Inject}.
  *
  * @since 4.0
  */
 class SpringMuleContextServiceConfigurator {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SpringMuleContextServiceConfigurator.class);
   private final MuleContext muleContext;
   private final ArtifactType artifactType;
   private final OptionalObjectsController optionalObjectsController;
@@ -253,12 +252,11 @@ class SpringMuleContextServiceConfigurator {
     }
   }
 
-  private void registerBeanDefinition(String serviceId, BeanDefinition defaultBeanDefinition) {
-    BeanDefinition beanDefinition = defaultBeanDefinition;
-    Optional<CustomService> customServiceOptional = customizationService.getOverriddenService(serviceId);
-    if (customServiceOptional.isPresent()) {
-      beanDefinition = getCustomServiceBeanDefinition(customServiceOptional.get());
-    }
+  private void registerBeanDefinition(String serviceId, BeanDefinition beanDefinition) {
+    beanDefinition = customizationService.getOverriddenService(serviceId)
+        .map(this::getCustomServiceBeanDefinition)
+        .orElse(beanDefinition);
+    
     beanDefinitionRegistry.registerBeanDefinition(serviceId, beanDefinition);
   }
 
@@ -344,7 +342,7 @@ class SpringMuleContextServiceConfigurator {
   private void createBootstrapBeanDefinitions() {
     try {
       SpringRegistryBootstrap springRegistryBootstrap =
-          new SpringRegistryBootstrap(artifactType, muleContext, optionalObjectsController, beanDefinitionRegistry);
+          new SpringRegistryBootstrap(artifactType, muleContext, optionalObjectsController, this::registerBeanDefinition);
       springRegistryBootstrap.initialise();
     } catch (InitialisationException e) {
       throw new RuntimeException(e);
