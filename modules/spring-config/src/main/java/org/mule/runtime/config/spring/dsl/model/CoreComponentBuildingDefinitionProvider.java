@@ -81,7 +81,6 @@ import org.mule.runtime.config.spring.factories.ResponseMessageProcessorsFactory
 import org.mule.runtime.config.spring.factories.ScatterGatherRouterFactoryBean;
 import org.mule.runtime.config.spring.factories.SchedulingMessageSourceFactoryBean;
 import org.mule.runtime.config.spring.factories.SubflowMessageProcessorChainFactoryBean;
-import org.mule.runtime.config.spring.factories.streaming.FileStoreCursorStreamProviderObjectFactory;
 import org.mule.runtime.config.spring.factories.streaming.InMemoryCursorStreamProviderObjectFactory;
 import org.mule.runtime.config.spring.factories.streaming.NullCursorStreamProviderObjectFactory;
 import org.mule.runtime.config.spring.util.SpringBeanLookup;
@@ -168,9 +167,6 @@ import org.mule.runtime.core.routing.filters.WildcardFilter;
 import org.mule.runtime.core.routing.outbound.MulticastingRouter;
 import org.mule.runtime.core.routing.requestreply.SimpleAsyncRequestReplyRequester;
 import org.mule.runtime.core.source.StartableCompositeMessageSource;
-import org.mule.runtime.core.source.scheduler.SchedulerMessageSource;
-import org.mule.runtime.core.source.scheduler.schedule.FixedFrequencyScheduler;
-import org.mule.runtime.core.streaming.bytes.CursorStreamProviderFactory;
 import org.mule.runtime.core.transaction.TransactionType;
 import org.mule.runtime.core.transaction.lookup.GenericTransactionManagerLookupFactory;
 import org.mule.runtime.core.transaction.lookup.JBossTransactionManagerLookupFactory;
@@ -1185,18 +1181,6 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
         .withConstructorParameterDefinition(
                                             fromSimpleParameter("maxInMemorySize")
                                                 .withDefaultValue(0)
-                                                .build())
-        .withConstructorParameterDefinition(
-                                            fromSimpleParameter("bufferUnit", value -> DataUnit.valueOf((String) value))
-                                                .withDefaultValue(DEFAULT_STREAMING_BUFFER_DATA_UNIT).build())
-        .build());
-
-    buildingDefinitions.add(baseDefinition.copy()
-        .withIdentifier("repeatable-file-store-stream")
-        .withTypeDefinition(fromType(CursorStreamProviderFactory.class))
-        .withObjectFactoryType(FileStoreCursorStreamProviderObjectFactory.class)
-        .withConstructorParameterDefinition(
-                                            fromSimpleParameter("maxInMemorySize").withDefaultValue(DEFAULT_STREAMING_BUFFER_SIZE)
                                                 .build())
         .withConstructorParameterDefinition(
                                             fromSimpleParameter("bufferUnit", value -> DataUnit.valueOf((String) value))
