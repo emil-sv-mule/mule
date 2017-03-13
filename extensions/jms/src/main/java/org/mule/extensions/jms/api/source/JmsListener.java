@@ -67,6 +67,7 @@ import org.slf4j.Logger;
 @Alias("listener")
 @EmitsResponse
 @MetadataScope(outputResolver = JmsOutputResolver.class)
+//TODO - MULE-11964 : Review JMS Listener's consumers usage implementation
 public class JmsListener extends Source<Object, JmsAttributes> {
 
   private static final Logger LOGGER = getLogger(JmsListener.class);
